@@ -166,11 +166,11 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
         sBackup = 0
         Q_excess = 0
         Q_HPSew, Q_HPLake, Q_GHP, Q_CC, Q_Furnace, Q_Boiler, Q_Backup = 0, 0, 0, 0, 0, 0, 0
-        E_el_HPSew, E_el_HPLake, E_el_GHP, E_el_CC_produced, E_el_Furnace_produced, E_el_BoilerBase, E_el_Backup = 0, 0, 0, 0, 0, 0, 0
-        E_gas_HPSew, E_gas_HPLake, E_gas_GHP, E_gas_CC, E_gas_Furnace, E_gas_Boiler, E_gas_Backup = 0, 0, 0, 0, 0, 0, 0
-        E_wood_HPSew, E_wood_HPLake, E_wood_GHP, E_wood_CC, E_wood_Furnace, E_wood_Boiler, E_wood_Backup = 0, 0, 0, 0, 0, 0, 0
-        E_coldsource_HPSew, E_coldsource_HPLake, E_coldsource_GHP, E_coldsource_CC, \
-        E_coldsource_Furnace, E_coldsource_Boiler, E_coldsource_Backup = 0, 0, 0, 0, 0, 0, 0
+        E_el_HPSew_required, E_el_HPLake_required, E_el_GHP_required, E_el_CC_produced, E_el_Furnace_produced, E_el_BoilerBase_required, E_el_Backup_required = 0, 0, 0, 0, 0, 0, 0
+        E_gas_HPSew_required, E_gas_HPLake_required, E_gas_GHP_required, E_gas_CC_produced, E_gas_Furnace_produced, E_gas_Boiler_required, E_gas_Backup_required = 0, 0, 0, 0, 0, 0, 0
+        E_wood_HPSew_required, E_wood_HPLake_required, E_wood_GHP_required, E_wood_CC_produced, E_wood_Furnace_produced, E_wood_Boiler_required, E_wood_Backup_required = 0, 0, 0, 0, 0, 0, 0
+        E_coldsource_HPSew_required, E_coldsource_HPLake_required, E_coldsource_GHP_required, E_coldsource_CC_produced, \
+        E_coldsource_Furnace_produced, E_coldsource_Boiler_required, E_coldsource_Backup_required = 0, 0, 0, 0, 0, 0, 0
 
         # print "Slave has uncovered demand?", Q_therm_req, " (if zero then no)"
         # print "else, the slave routine's while loop (PP Activation) will be started"
@@ -186,8 +186,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     sHPSew = 0
                     costHPSew = 0.0
                     Q_HPSew = 0.0
-                    E_el_HPSew = 0.0
-                    E_coldsource_HPSew = 0.0
+                    E_el_HPSew_required = 0.0
+                    E_coldsource_HPSew_required = 0.0
 
                     if Q_therm_req > MS_Var.HPSew_maxSize:
                         Q_therm_Sew = MS_Var.HPSew_maxSize
@@ -211,8 +211,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     costHPSew = float(C_HPSew_el_pure)
                     Q_HPSew = float(Q_HPSew_therm)
                     # print "\n Q_HPSew", Q_HPSew
-                    E_el_HPSew = float(E_HPSew_el)
-                    E_coldsource_HPSew = float(Q_HPSew_cold_primary)
+                    E_el_HPSew_required = float(E_HPSew_el)
+                    E_coldsource_HPSew_required = float(Q_HPSew_cold_primary)
 
                 if (
                 MS_Var.GHP_on) == 1 and hour >= MS_Var.GHP_SEASON_ON and hour <= MS_Var.GHP_SEASON_OFF and Q_therm_req > 0:
@@ -222,8 +222,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     srcGHP = 0
                     costGHP = 0.0
                     Q_GHP = 0.0
-                    E_el_GHP = 0.0
-                    E_coldsource_GHP = 0.0
+                    E_el_GHP_required = 0.0
+                    E_coldsource_GHP_required = 0.0
 
                     Q_max, GHP_COP = GHP_Op_max(tdhsup, gv.TGround, MS_Var.GHP_number, gv)
 
@@ -242,15 +242,15 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     srcGHP = 1
                     costGHP = C_GHP_el
                     Q_GHP = Q_GHP_therm
-                    E_el_GHP = Wdot_GHP
-                    E_coldsource_GHP = Q_GHP_cold_primary
+                    E_el_GHP_required = Wdot_GHP
+                    E_coldsource_GHP_required = Q_GHP_cold_primary
 
                 if (MS_Var.HP_Lake_on) == 1 and Q_therm_req > 0 and gv.HPLake_allowed == 1:  # run Heat Pump Lake
                     sHPLake = 0
                     costHPLake = 0
                     Q_HPLake = 0
-                    E_el_HPLake = 0
-                    E_coldsource_HPLake = 0
+                    E_el_HPLake_required = 0
+                    E_coldsource_HPLake_required = 0
 
                     if Q_therm_req > MS_Var.HPLake_maxSize:  # Scale down Load, 100% load achieved
                         Q_therm_HPL = MS_Var.HPLake_maxSize
@@ -270,8 +270,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     sHPLake = 1
                     costHPLake = C_HPL_el
                     Q_HPLake = Q_therm_HPL
-                    E_el_HPLake = Wdot_HPLake
-                    E_coldsource_HPLake = Q_HPL_cold_primary
+                    E_el_HPLake_required = Wdot_HPLake
+                    E_coldsource_HPLake_required = Q_HPL_cold_primary
 
                     # print Q_therm_req, "Q left"
 
@@ -284,7 +284,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                 sorcCC = 0
                 costCC = 0.0
                 Q_CC = 0.0
-                E_gas_CC = 0.0
+                E_gas_CC_produced = 0.0
                 E_el_CC_produced = 0
 
                 if (
@@ -321,7 +321,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                         sorcCC = 1
                         costCC = Cost_CC
                         Q_CC = Q_CC_delivered
-                        E_gas_CC = Q_used_prim_CC
+                        E_gas_CC_produced = Q_used_prim_CC
                     else:
                         print "CC below part load"
 
@@ -331,7 +331,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     sorcFurnace = 0
                     costFurnace = 0.0
                     Q_Furnace = 0.0
-                    E_wood_Furnace = 0.0
+                    E_wood_Furnace_produced = 0.0
                     Q_Furn_prim = 0.0
 
                     if Q_therm_req > (
@@ -363,7 +363,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                         sorcFurnace = 1
                         costFurnace = C_Furn_therm.copy()
                         Q_Furnace = Q_Furn_therm
-                        E_wood_Furnace = Q_Furn_prim
+                        E_wood_Furnace_produced = Q_Furn_prim
                         # print "Q_Furn_therm", Q_Furn_therm
                         # print "E_el_Furnace_produced", E_el_Furnace_produced
 
@@ -381,8 +381,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     sBoiler = 0
                     costBoiler = 0.0
                     Q_Boiler = 0.0
-                    E_gas_Boiler = 0.0
-                    E_el_BoilerBase = 0.0
+                    E_gas_Boiler_required = 0.0
+                    E_el_BoilerBase_required = 0.0
 
                     if Q_therm_req >= gv.Boiler_min * MS_Var.Boiler_Q_max:  # Boiler can be activated?
                         # Q_therm_boiler = Q_therm_req
@@ -399,11 +399,11 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                         sBoiler = 1
                         costBoiler = C_boil_therm
                         Q_Boiler = Q_therm_boiler
-                        E_gas_Boiler = Q_primary
-                        E_el_BoilerBase = E_aux_Boiler
+                        E_gas_Boiler_required = Q_primary
+                        E_el_BoilerBase_required = E_aux_Boiler
                         Q_therm_req -= Q_therm_boiler
                         # print "Base Boiler activated with ", Q_therm_boiler
-                        # print "E_el_BoilerBase ",E_el_BoilerBase
+                        # print "E_el_BoilerBase_required ",E_el_BoilerBase_required
                     else:
                         print "Base Boiler not activated (below part load)"
 
@@ -416,8 +416,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     sBackup = 0
                     costBackup = 0.0
                     Q_Backup = 0.0
-                    E_gas_Backup = 0
-                    E_el_Backup = 0
+                    E_gas_Backup_required = 0
+                    E_el_Backup_required = 0
 
                     if Q_therm_req > 0:  # gv.Boiler_min*MS_Var.BoilerPeak_Q_max: # Boiler can be activated?
 
@@ -435,10 +435,10 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                         sBackup = 1
                         costBackup = C_boil_thermP
                         Q_Backup = Q_therm_boilerP
-                        E_gas_Backup = Q_primaryP
-                        E_el_Backup = E_aux_BoilerP
+                        E_gas_Backup_required = Q_primaryP
+                        E_el_Backup_required = E_aux_BoilerP
                         # print "Peak Boiler activated with ", Q_Backup
-                        # print "E_el_Backup ",E_el_Backup
+                        # print "E_el_Backup_required ",E_el_Backup_required
 
 
                         # print Q_therm_req, "Q left"
@@ -499,11 +499,11 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
         cost_data_centralPlant_op = costHPSew, costHPLake, costGHP, costCC, costFurnace, costBoiler, costBackup
         source_info = sHPSew, sHPLake, srcGHP, sorcCC, sorcFurnace, sBoiler, sBackup
         Q_source_data = Q_HPSew, Q_HPLake, Q_GHP, Q_CC, Q_Furnace, Q_Boiler, Q_Backup, Q_uncovered
-        E_PP_el_data = E_el_HPSew, E_el_HPLake, E_el_GHP, E_el_CC_produced, E_el_Furnace_produced, E_el_BoilerBase, E_el_Backup
-        E_gas_data = E_gas_HPSew, E_gas_HPLake, E_gas_GHP, E_gas_CC, E_gas_Furnace, E_gas_Boiler, E_gas_Backup
-        E_wood_data = E_wood_HPSew, E_wood_HPLake, E_wood_GHP, E_wood_CC, E_wood_Furnace, E_wood_Boiler, E_wood_Backup
-        E_coldsource_data = E_coldsource_HPSew, E_coldsource_HPLake, E_coldsource_GHP, E_coldsource_CC, \
-                            E_coldsource_Furnace, E_coldsource_Boiler, E_coldsource_Backup
+        E_PP_el_data = E_el_HPSew_required, E_el_HPLake_required, E_el_GHP_required, E_el_CC_produced, E_el_Furnace_produced, E_el_BoilerBase_required, E_el_Backup_required
+        E_gas_data = E_gas_HPSew_required, E_gas_HPLake_required, E_gas_GHP_required, E_gas_CC_produced, E_gas_Furnace_produced, E_gas_Boiler_required, E_gas_Backup_required
+        E_wood_data = E_wood_HPSew_required, E_wood_HPLake_required, E_wood_GHP_required, E_wood_CC_produced, E_wood_Furnace_produced, E_wood_Boiler_required, E_wood_Backup_required
+        E_coldsource_data = E_coldsource_HPSew_required, E_coldsource_HPLake_required, E_coldsource_GHP_required, E_coldsource_CC_produced, \
+                            E_coldsource_Furnace_produced, E_coldsource_Boiler_required, E_coldsource_Backup_required
 
         return cost_data_centralPlant_op, source_info, Q_source_data, E_coldsource_data, E_PP_el_data, E_gas_data, E_wood_data, Q_excess
 
@@ -613,9 +613,9 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
             "E_PP_and_storage": E_PP_and_storage,
             "Q_uncovered": Q_source_data[:, 7],
             "Q_AddBoiler": QUncovered,
-            "E_aux_HP_uncontrollable": E_aux_HP_uncontrollable[:, 0],
+            "E_aux_HP_uncontrollable_required": E_aux_HP_uncontrollable[:, 0],
             "ESolarProducedPVandPVT": ESolarProduced[:, 0],
-            "E_GHP": E_PP_el_data[:, 2],
+            "E_GHP_required": E_PP_el_data[:, 2],
             "Qcold_HPLake": E_coldsource_data[:, 1],
             "E_produced_total": E_produed_total,
             "E_consumed_without_buildingdemand": E_consumed_without_buildingdemand,
