@@ -570,7 +570,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
                     E_PP_el_data[:, 5] + E_PP_el_data[:, 6] + E_aux_AddBoiler
     E_aux_storage_operation = E_aux_ch[:, 0] + E_aux_dech[:, 0]
     E_aux_storage_operation_sum = np.sum(E_aux_storage_operation)
-    E_PP_and_storage = E_PP_tot_used + E_aux_storage_operation
+    E_PP_and_storage_required = E_PP_tot_used + E_aux_storage_operation
     E_HP_SolarAndHeatRecoverySum = np.sum(E_aux_HP_uncontrollable)
     # Sum up all electricity produced by CHP (CC and Furnace)
     # cost already accounted for in System Models (selling electricity --> cheaper thermal energy)
@@ -581,7 +581,7 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
 
     E_produed_total = E_produced_solarAndHPforSolar[:, 0] + E_CC_tot_produced
 
-    E_consumed_without_buildingdemand = E_consumed_without_buildingdemand_solarAndHPforSolar[:, 0] + E_PP_and_storage
+    E_without_buildingdemand_required = E_consumed_without_buildingdemand_solarAndHPforSolar[:, 0] + E_PP_and_storage_required
 
     if save_file == 1:
         results = pd.DataFrame({
@@ -610,15 +610,15 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
             "Q_BoilerPeak": Q_source_data[:, 6],
             "Q_uncontrollable": Q_uncontrollable[:, 0],
             "Q_primaryAddBackupSum": Q_primaryAddBackupSum,
-            "E_PP_and_storage": E_PP_and_storage,
+            "E_PP_and_storage_required": E_PP_and_storage_required,
             "Q_uncovered": Q_source_data[:, 7],
             "Q_AddBoiler": QUncovered,
             "E_aux_HP_uncontrollable_required": E_aux_HP_uncontrollable[:, 0],
-            "ESolarProducedPVandPVT": ESolarProduced[:, 0],
+            "ESolarPVandPVT_Produced": ESolarProduced[:, 0],
             "E_GHP_required": E_PP_el_data[:, 2],
             "Qcold_HPLake": E_coldsource_data[:, 1],
             "E_produced_total": E_produed_total,
-            "E_consumed_without_buildingdemand": E_consumed_without_buildingdemand,
+            "E_without_buildingdemand_required": E_without_buildingdemand_required,
             "Q_excess": Q_excess
         })
 
@@ -639,8 +639,8 @@ def least_cost_main(locator, master_to_slave_vars, solar_features, gv):
 
     # sum up results from PP Activation
     # E_HPSew_sum = np.sum(E_el_data) - Sums up the energy consumption of
-    E_el_sum_consumed = np.sum(E_PP_and_storage) + np.sum(E_aux_HP_uncontrollable)  # (excl. AddBoiler)
-    print "np.sum(E_PP_and_storage)", np.sum(E_PP_and_storage)
+    E_el_sum_consumed = np.sum(E_PP_and_storage_required) + np.sum(E_aux_HP_uncontrollable)  # (excl. AddBoiler)
+    print "np.sum(E_PP_and_storage_required)", np.sum(E_PP_and_storage_required)
     print "np.sum(E_aux_HP_uncontrollable)", np.sum(E_aux_HP_uncontrollable)
 
     # Differenciate between Normal and green electricity for
